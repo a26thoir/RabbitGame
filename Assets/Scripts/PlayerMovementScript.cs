@@ -3,13 +3,20 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovementScript : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    // Fields
+
+    public bool canMove { get; set; } = true; // Can set movement controls on/ off Reference: Canvas Customizable Script 
+    
+    [SerializeField] private Rigidbody2D rigidbody;
+    // Constructor
+    
+    // Methods
+    
     void Start()
     {
-        
+        rigidbody = GetComponent<Rigidbody2D>();
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
         
