@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -22,6 +23,7 @@ public class PlayerMovementScript : MonoBehaviour
     [Header("Movement Values")]
     [SerializeField] private float maxSpeed = 15f;
     [SerializeField] private float walkAcceleration = 15f;
+    [SerializeField] private float initalSpeed = 5f;
     
     // Constructor
     
@@ -54,15 +56,19 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (inputDirection.x != 0)
         {
+            if (math.abs(horizontalVelocity.x) < initalSpeed)
+            {
+                horizontalVelocity.x = inputDirection.x * initalSpeed;
+            }
             horizontalVelocity = Vector2.ClampMagnitude(horizontalVelocity + (walkAcceleration * Time.deltaTime * inputDirection), maxSpeed);
         }
         else
         {
             horizontalVelocity = Vector2.zero;
         }
-        
 
-        rigidbody.linearVelocity = horizontalVelocity + verticalVelocity;
+
+        rigidbody.linearVelocity = new Vector2(horizontalVelocity.x,verticalVelocity.y);
         
         //Animation
         if (inputDirection.x > 0)
