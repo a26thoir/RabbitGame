@@ -5,17 +5,42 @@ public class EnemyDetection : MonoBehaviour
     [Tooltip("This is where you insert the player/object you want detected")] 
     [SerializeField] private GameObject player;
 
-    [Tooltip("This is where you insert the object for boundaries")] 
-    [SerializeField] private Bounds boundObject;
+    [Tooltip("This is where you insert the platform the enemy walks on")] 
+    [SerializeField] private GameObject bounds;
+
+    private Bounds BoundObject => bounds.GetComponent<Bounds>();
+
+    [Tooltip("This is the offset of the platform, for tweaking edges")] //Not to be confused with the raycastingoffset, as we're using both methods
+    [SerializeField] private float boundsOffset;
+
+    [Tooltip("This is the offset how far ahead the raycast should check for ground")]
+    [SerializeField] private float raycastOffset;
+
+    [Tooltip("This is how far down the raycast will check for ground")] 
+    [SerializeField] private float rayDistance;
+    
+    [Tooltip("This is the speed in the patrol state")] 
+    [SerializeField] public float patrolSpeed = 2.0f;
+
+    [Tooltip("This is the HuntSpeed of the enemy")] 
+    [SerializeField] private float huntSpeed = 6.0f;
+
+    [Tooltip("Insert which way the sprite is facing at default (-1 = left, 1 = right) NEVER 0")] 
+    [SerializeField] private int direction;
 
 
-    [Tooltip("This is the speed in the patrol state")] [SerializeField]
-    public float patrolspeed = 2.0f;
+    private float idleTimer = 2.0f;
 
-    private Vector2 boundsLeft => new Vector2(boundObject.min.x, boundObject.min.y);
-    private Vector2 boundsRight => new Vector2(boundObject.max.x, boundObject.min.y);
+    private float detectionTime = 1.0f;
 
-    private EnemyStates currentstate = EnemyStates.Idle;
+    private bool spotted;
+    
+    
+    private Vector2 BoundsLeft => new Vector2(BoundObject.min.x, BoundObject.min.y);
+    private Vector2 BoundsRight => new Vector2(BoundObject.max.x, BoundObject.min.y);
+    
+
+    private EnemyStates currentstate = EnemyStates.Patrol;
     
     public enum EnemyStates
     {
@@ -26,23 +51,72 @@ public class EnemyDetection : MonoBehaviour
 
     private void Detect()
     {
-        
+        detectionTime -= Time.deltaTime;
+
+        if (detectionTime <= 0)
+        {
+            transform.position =
+                Vector2.MoveTowards(
+                    transform.position, 
+                    player.transform.position, 
+                    huntSpeed * Time.deltaTime);
+        }
+
+        if (!spotted) ChangeState(EnemyStates.Idle);
     }
 
     private void Idle()
     {
+        idleTimer -= Time.deltaTime;
+
+        if (idleTimer <= 0)
+        {
+            ChangeState(EnemyStates.Patrol);
+        }
         
+        if (spotted) ChangeState(EnemyStates.Detect);
     }
 
     private void Patrol()
     {
+        Vector2 rayOrigin = (Vector2)transform.position + new Vector2(direction * raycastOffset, 0.3f);
+
+        RaycastHit2D rayHit = Physics2D.Raycast(rayOrigin, Vector2.down, rayDistance, LayerMask.GetMask("Ground"));
         
+        Debug.DrawRay(rayOrigin, Vector2.down * rayDistance, rayHit.collider != null? Color.green : Color.red);
+
+        if (rayHit.collider == null)
+        {
+            direction *= -1;
+            ChangeState(EnemyStates.Idle);
+        }
         
+        transform.Translate(Vector2.right * (direction * patrolSpeed * Time.deltaTime));
+        
+        if (spotted) ChangeState(EnemyStates.Detect);
+
+    }
+
+    /*void EnemySpot()
+    {
+        Vector2 rayOrigin = (Vector2)transform.position + new Vector2(direction * )
+    }*/
+    
+
+    private void ChangeState(EnemyStates nextState)
+    {
+        currentstate = nextState;
+
+        if (nextState == EnemyStates.Idle)
+        {
+            idleTimer = 1.5f;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        
         // Statecheck of the enemy, easy to add new functions and states
         switch (currentstate)
         {
@@ -59,6 +133,6 @@ public class EnemyDetection : MonoBehaviour
                 break;
             
         }
-        
+        //TODO: if removed from original platform, try to search for a new underneath w GetComponent and using the Layermask Ground
     }
 }
