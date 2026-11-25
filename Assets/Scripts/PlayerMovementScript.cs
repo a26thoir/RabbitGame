@@ -9,7 +9,8 @@ public class PlayerMovementScript : MonoBehaviour
     public bool canMove { get; set; } = true; // Can set movement controls on/ off Reference: Canvas Customizable Script 
     private bool grounded, wasGrounded = true;
     private Vector2 inputDirection = Vector2.zero;
-    private 
+    private Vector2 horizontalVelocity = Vector2.zero;
+    private Vector2 verticalVelocity = Vector2.zero;
 
     public bool controlEnabled { get; set; } = true;
     
@@ -20,6 +21,7 @@ public class PlayerMovementScript : MonoBehaviour
     
     [Header("Movement Values")]
     [SerializeField] private float maxSpeed = 15f;
+    [SerializeField] private float walkAcceleration = 15f;
     
     // Constructor
     
@@ -27,31 +29,63 @@ public class PlayerMovementScript : MonoBehaviour
     
     void Start()
     {
-        rigidbody = GetComponent<Rigidbody2D>();
+        
     }
-    
+
+    private void Awake()
+    {
+        rigidbody = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        
+        rigidbody.gravityScale = 0f;
+        controlEnabled = true;
+    }
+
     void Update()
     {
         
+        
+        
+    }
+
+    private void FixedUpdate()
+    {
+        grounded = isGrounded();
+
+        if (inputDirection.x != 0)
+        {
+            horizontalVelocity = Vector2.ClampMagnitude(horizontalVelocity + (walkAcceleration * Time.deltaTime * inputDirection), maxSpeed);
+        }
+        else
+        {
+            horizontalVelocity = Vector2.zero;
+        }
+        
+
+        rigidbody.linearVelocity = horizontalVelocity + verticalVelocity;
+        
+        //Animation
+        if (inputDirection.x > 0)
+        {
+            spriteRenderer.flipX = true;
+        }
+        else if (inputDirection.x < 0)
+        {
+            spriteRenderer.flipX = false;
+        }
     }
 
     private bool isGrounded()
     {
-        if (groundCollider.IsTouchingLayers(groundLayer))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return groundCollider.IsTouchingLayers(groundLayer);
     }
 
     public void onMove(InputAction.CallbackContext context)
     {
         if (controlEnabled)
         {
-            inputDirection = context.ReadValue<Vector2>();
+            inputDirection = context.ReadValue<Vector2>().normalized;
+            Debug.Log("Bullishitti");
         }
     }
 }
