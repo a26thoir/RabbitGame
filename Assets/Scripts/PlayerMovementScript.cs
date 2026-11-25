@@ -11,6 +11,10 @@ public class PlayerMovementScript : MonoBehaviour
     
     
     [SerializeField] private Rigidbody2D rigidbody;
+
+    [SerializeField] private CapsuleCollider2D groundCollider;
+
+    [SerializeField] private LayerMask groundLayer = ~0;
     // Constructor
     
     // Methods
@@ -23,6 +27,18 @@ public class PlayerMovementScript : MonoBehaviour
     void Update()
     {
         
+    }
+
+    private bool isGrounded()
+    {
+        if (groundCollider.IsTouchingLayers(groundLayer))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public void onMove(InputAction.CallbackContext context)

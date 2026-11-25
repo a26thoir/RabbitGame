@@ -38,58 +38,58 @@ rigidbody.gravityScale = 0; // Set gravity scale to 0 so player won't"fall". We 
 void Update()
 {
 //---Handle vertical velocity---
-isGrounded = IsGrounded();
-ApplyGravity();
+    isGrounded = IsGrounded();
+    ApplyGravity();
 // Apply jump-input:
-if (jumpInput && wasGrounded)
-{
-velocity.y = jumpForce;
-jumpInput = false;
-}
+    if (jumpInput && wasGrounded)
+    {
+        velocity.y = jumpForce;
+        jumpInput = false;
+    }
 // Check if character lost contact with ground this frame
-if (wasGrounded == true && isGrounded == false)
-{
-if (velocity.y < 0)
-{
+    if (wasGrounded == true && isGrounded == false)
+    {
+        if (velocity.y < 0)
+        {
 // Has fallen. Play fall sound and/or trigger fall animation etc
-}
-else
-{
+        }
+        else
+        {
 // Has jumped. Play jump sound and/or trigger jump animation etc
-}
-}
+        }
+    }
 // Check if character gained contact with ground this frame
-else if (wasGrounded == false && isGrounded == true)
-{
-jumpReleased = false;
+    else if (wasGrounded == false && isGrounded == true)
+    {
+        jumpReleased = false;
 // Has landed, play landing sound and trigger landing animation
-}
-rigidbody.linearVelocity = velocity;
-wasGrounded = isGrounded;
+    }
+    rigidbody.linearVelocity = velocity;
+    wasGrounded = isGrounded;
 //---Handle horizontal velocity---
-velocity.x = moveInput.x * maxSpeed;
+    velocity.x = moveInput.x * maxSpeed;
 // Write movement animation code here. (Suggestion: send your current velocity into the Animator for both the x- and y-axis.)
 // animator.SetFloat("HorizontalMovement", moveInput.x)
 // Flip sprite according to direction (if a sprite renderer has been assigned)
-if (spriteRenderer)
-{
-if (moveInput.x > 0.01f)
-spriteRenderer.flipX = false;
-else if (moveInput.x < -0.01f)
-spriteRenderer.flipX = true;
-}
+    if (spriteRenderer)
+    {
+        if (moveInput.x > 0.01f)
+            spriteRenderer.flipX = false;
+        else if (moveInput.x < -0.01f)
+            spriteRenderer.flipX = true;
+    }
 }
 private bool IsGrounded()
 {
 // Is our groundCheckCollider touching the groundLayer? If so, return the value "true"
-if (groundCheckCollider.IsTouchingLayers(groundLayer))
-{
-return true;
-}
-else
-{
-return false;
-}
+    if (groundCheckCollider.IsTouchingLayers(groundLayer))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 private void ApplyGravity()
 {
