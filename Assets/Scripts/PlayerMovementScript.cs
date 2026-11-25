@@ -6,6 +6,9 @@ public class PlayerMovementScript : MonoBehaviour
     // Fields
 
     public bool canMove { get; set; } = true; // Can set movement controls on/ off Reference: Canvas Customizable Script 
+    private bool grounded, wasGrounded = true;
+    
+    
     
     [SerializeField] private Rigidbody2D rigidbody;
     // Constructor
