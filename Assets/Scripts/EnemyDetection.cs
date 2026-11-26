@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -33,9 +34,21 @@ public class EnemyDetection : MonoBehaviour
     [Tooltip("This is the object in which is the ¨vision¨ for the enemy(usually a cone or box)")]
     [SerializeField] private GameObject detectionZone;
 
+    [Tooltip("This is the object which is the outer bounds for the enemy(outer detection)")] 
+    [SerializeField] private GameObject OuterDetectionZone;
+
+    [SerializeField] private Transform test;
+
+    [SerializeField] private Collider2D playerhitbox;
+    
+    private CircleCollider2D OuterDetectCircle => OuterDetectionZone.GetComponent<CircleCollider2D>();
+    
+
     private float idleTimer = 2.0f;
 
-    private float detectionTime = 1.0f;
+    private float detectionholdupTime = 1.0f;
+
+    private float detectionHuntTime = 5.0f;
 
     private bool spotted;
 
@@ -62,18 +75,23 @@ public class EnemyDetection : MonoBehaviour
 
     private void Detect()
     {
-        detectionTime -= Time.deltaTime;
-
-        if (detectionTime <= 0)
+        detectionholdupTime -= Time.deltaTime;
+        //if (detectionholdupTime <= 0 && Physics2D.OverlapCircle(OuterDetectCircle.transform.position, OuterDetectCircle.radius, 7 ) )
+        if (OuterDetectCircle.IsTouching(playerhitbox))
         {
-            transform.position =
-                Vector2.MoveTowards(
+            Debug.Log("detected");
+            Vector2 tryToMove = Vector2.MoveTowards(
                     transform.position, 
                     player.transform.position, 
                     huntSpeed * Time.deltaTime);
+            
         }
-
-        if (!spotted) ChangeState(EnemyStates.Idle);
+        /*else
+        {
+            Debug.Log(" not detected");
+            ChangeState(EnemyStates.Idle);
+            spotted = false;
+        }*/
     }
 
     private void Idle()
@@ -115,32 +133,31 @@ public class EnemyDetection : MonoBehaviour
     }
 
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerStay2D(Collider2D other)
     {
         if (other.tag == "Player")
         {
-            Vector2 rayOrigin = (Vector2)detectionZone.transform.position + new Vector2(detectionZone.transform.position.x/2 * direction,0);
+
+            Vector2 rayOrigin = new Vector2(test.position.x, test.position.y);
             
+            Vector2 rayDir = (other.transform.position - detectionZone.transform.position).normalized;
+
+            float rayDistance = Vector2.Distance(rayOrigin, other.transform.position);
             
+            RaycastHit2D rayHit = Physics2D.Raycast(rayOrigin, rayDir, rayDistance, 
+                LayerMask.GetMask("Ground"));
             
-            RaycastHit2D rayHit = Physics2D.Raycast(rayOrigin, (detectionZone.transform.position - other.transform.position).normalized, 
-                Vector2.Distance(rayOrigin, other.transform.position), LayerMask.GetMask("Player"));
+            Debug.DrawRay(rayOrigin, rayDir * rayDistance, rayHit.collider ? Color.green : Color.red);
             
-            //TODO Debug.DrawRay(rayOrigin, );
-            if (rayHit.collider)
+            if (!rayHit.collider)
             {
-                
+                spotted = true;
+                ChangeState(EnemyStates.Detect);
             }
-            
+            else spotted = false;
         }
     }
     
-    void Hunt()
-    {
-    
-    }
-    
-
     private void ChangeState(EnemyStates nextState)
     {
         currentstate = nextState;
