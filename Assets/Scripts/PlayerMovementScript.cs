@@ -86,6 +86,11 @@ public class PlayerMovementScript : MonoBehaviour
         return groundCollider.IsTouchingLayers(groundLayer);
     }
 
+    private void ApplyGravity()
+    {
+        
+    }
+
     public void onMove(InputAction.CallbackContext context)
     {
         if (controlEnabled)

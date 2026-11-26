@@ -94,31 +94,31 @@ private bool IsGrounded()
 private void ApplyGravity()
 {
 // Applies a set gravity for when player is grounded
-if (isGrounded && velocity.y < 0.0f)
-{
-velocity.y = -1.0f;
-}
+    if (isGrounded && velocity.y < 0.0f)
+    {
+        velocity.y = -1.0f;
+    }
 // Updates fall speed with gravity if object isn't grounded
-else
-{
+    else
+    {
 // Is Jumping upwards
-if (velocity.y > 0)
-{
-float deceleration = 1;
-if (jumpReleased) // shorter jump height when releasing the jump-key
-{
-deceleration = 5;
-}
+        if (velocity.y > 0)
+        {
+            float deceleration = 1;
+            if (jumpReleased) // shorter jump height when releasing the jump-key
+            {
+                deceleration = 5;
+            }
 // you can add a gravity multiplier here... but how?
-velocity.y += Physics2D.gravity.y * deceleration * Time.deltaTime;
-}
+            velocity.y += Physics2D.gravity.y * deceleration * Time.deltaTime;
+        }
 // Is Falling
-else
-{
+        else
+        {
 // you can add a gravity multiplier here... but how?
-velocity.y += Physics2D.gravity.y * Time.deltaTime;
-}
-}
+            velocity.y += Physics2D.gravity.y * Time.deltaTime;
+        }
+    }
 }
 // Handle Move-input
 // This method can be triggered through the UnityEvent in PlayerInput
