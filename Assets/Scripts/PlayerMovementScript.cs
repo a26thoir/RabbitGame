@@ -15,6 +15,8 @@ public class PlayerMovementScript : MonoBehaviour
     private bool jumping = false;
     private Vector2 horizontalVelocity = Vector2.zero;
     private Vector2 verticalVelocity = Vector2.zero;
+    private float timeSinceMove = 1.0f;
+    private float lastInputX = 0.0f;
 
     public bool controlEnabled { get; set; } = true;
     
@@ -28,6 +30,8 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] private float walkAcceleration = 15f;
     [SerializeField] private float initalSpeed = 5f;
     [SerializeField] private float jumpForce = 10f;
+    [SerializeField] private float groundedDeceleration = 0.5f;
+    [SerializeField] private float aerialDeceleration = 0.5f;
     
     // Constructor
     
@@ -67,15 +71,35 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (inputDirection.x != 0)
         {
+            timeSinceMove = 0;
             if (math.abs(horizontalVelocity.x) < initalSpeed)
             {
                 horizontalVelocity.x = inputDirection.x * initalSpeed;
             }
             horizontalVelocity = Vector2.ClampMagnitude(horizontalVelocity + (walkAcceleration * Time.deltaTime * inputDirection), maxSpeed);
+            lastInputX = horizontalVelocity.x;
         }
         else
         {
-            horizontalVelocity = Vector2.zero;
+            timeSinceMove += Time.deltaTime;
+            
+            float decel = aerialDeceleration;
+            if (grounded)
+            {
+                decel = groundedDeceleration;
+            }
+
+            if (horizontalVelocity.magnitude < initalSpeed)
+            {
+                decel *= decel;
+            }
+            
+            horizontalVelocity.x = lastInputX * math.pow(decel,timeSinceMove);
+
+            if (grounded && horizontalVelocity.magnitude < initalSpeed / 1.5)
+            {
+                horizontalVelocity.x = 0;
+            }
         }
         
         //Where jumping actually happens
@@ -111,10 +135,10 @@ public class PlayerMovementScript : MonoBehaviour
         {
             if (verticalVelocity.y > 0.0f)
             {
-                float deceleration = 5;
+                float deceleration = 10;
                 if (jumping)
                 {
-                    deceleration = 1;
+                    deceleration = 2;
                 }
 
                 verticalVelocity.y += Physics2D.gravity.y * deceleration * Time.deltaTime;
