@@ -66,8 +66,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1.65, y: 0.7}
+  m_Offset: {x: 0, y: 0.1}
+  m_Size: {x: 1.65, y: 0.5}
   m_Direction: 1
 --- !u!1 &2797697599954368421
 GameObject:
@@ -551,10 +551,10 @@ MonoBehaviour:
     m_Bits: 4294967295
   maxSpeed: 15
   walkAcceleration: 15
-  initalSpeed: 5
+  initalSpeed: 6.5
   jumpForce: 15
   groundedDeceleration: 0.05
-  aerialDeceleration: 0.2
+  aerialDeceleration: 0.3
 --- !u!1 &6285025815696300882
 GameObject:
   m_ObjectHideFlags: 0
