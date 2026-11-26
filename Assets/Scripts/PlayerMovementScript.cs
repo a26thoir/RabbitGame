@@ -89,7 +89,7 @@ public class PlayerMovementScript : MonoBehaviour
                 decel = groundedDeceleration;
             }
 
-            if (horizontalVelocity.magnitude < initalSpeed)
+            if (grounded && horizontalVelocity.magnitude < initalSpeed)
             {
                 decel *= decel;
             }
@@ -145,6 +145,7 @@ public class PlayerMovementScript : MonoBehaviour
             }
             else
             {
+                jumping = false;
                 verticalVelocity.y += Physics2D.gravity.y * Time.deltaTime;
             }
         }
