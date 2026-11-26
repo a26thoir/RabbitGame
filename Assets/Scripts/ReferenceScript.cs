@@ -137,16 +137,16 @@ moveInput = Vector2.zero;
 // This method can be triggered through the UnityEvent in PlayerInput
 public void OnJump(InputAction.CallbackContext context)
 {
-if (context.started && controlEnabled)
-{
-Debug.Log("Jump!");
-jumpInput = true;
-jumpReleased = false;
-}
-if (context.canceled && controlEnabled)
-{
-jumpReleased = true;
-jumpInput = false;
-}
+    if (context.started && controlEnabled)
+    {
+        Debug.Log("Jump!");
+        jumpInput = true;
+        jumpReleased = false;
+    }
+    if (context.canceled && controlEnabled)
+    {
+        jumpReleased = true;
+        jumpInput = false;
+    }
 }
 }
