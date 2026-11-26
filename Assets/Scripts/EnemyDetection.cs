@@ -126,7 +126,7 @@ public class EnemyDetection : MonoBehaviour
             RaycastHit2D rayHit = Physics2D.Raycast(rayOrigin, (detectionZone.transform.position - other.transform.position).normalized, 
                 Vector2.Distance(rayOrigin, other.transform.position), LayerMask.GetMask("Player"));
             
-            Debug.DrawRay(rayOrigin, );
+            //TODO Debug.DrawRay(rayOrigin, );
             if (rayHit.collider)
             {
                 
