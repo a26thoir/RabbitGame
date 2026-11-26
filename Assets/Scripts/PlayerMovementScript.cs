@@ -9,6 +9,7 @@ public class PlayerMovementScript : MonoBehaviour
 
     public bool canMove { get; set; } = true; // Can set movement controls on/ off Reference: Canvas Customizable Script 
     private bool grounded, wasGrounded = true;
+    private bool hasBouncedOnWall = false;
     private Vector2 inputDirection = Vector2.zero;
     private bool jumpInput = false;
     
@@ -56,11 +57,17 @@ public class PlayerMovementScript : MonoBehaviour
     void Update()
     {
         //Animation
-        if (inputDirection.x > 0)
+        Vector2 horzAnimationVelocity = inputDirection;
+        if (hasBouncedOnWall)
+        {
+            horzAnimationVelocity = horizontalVelocity;
+        }
+        
+        if (horzAnimationVelocity.x > 0)
         {
             spriteRenderer.flipX = true;
         }
-        else if (inputDirection.x < 0)
+        else if (horzAnimationVelocity.x < 0)
         {
             spriteRenderer.flipX = false;
         }
@@ -73,7 +80,30 @@ public class PlayerMovementScript : MonoBehaviour
 
         bool touchingWall = isTouchingWall();
 
-        if (inputDirection.x != 0)
+        if (grounded)
+        {
+            hasBouncedOnWall = false;
+        }
+        
+        if (touchingWall)
+        {
+            if (!hasBouncedOnWall && horizontalVelocity.magnitude > initalSpeed * 1.5)
+            {
+                hasBouncedOnWall = true;
+                horizontalVelocity.x *= -0.8f;
+            }
+            else
+            {
+                //horizontalVelocity.x *= 0;
+            }
+            
+        }
+
+        if (hasBouncedOnWall)
+        {
+            horizontalVelocity.x = math.lerp(horizontalVelocity.x, inputDirection.x * maxSpeed, Time.deltaTime);
+        }
+        else if (inputDirection.x != 0)
         {
             timeSinceMove = 0;
             if (math.abs(horizontalVelocity.x) < initalSpeed)
@@ -105,11 +135,9 @@ public class PlayerMovementScript : MonoBehaviour
                 horizontalVelocity.x = 0;
             }
 
-            if (touchingWall)
-            {
-                //TODO Fortsätt här!!
-            }
+            
         }
+        
         
         //Where jumping actually happens
         if (jumpInput && grounded)
@@ -174,6 +202,8 @@ public class PlayerMovementScript : MonoBehaviour
         }
     }
 
+    
+    
     public void onJump(InputAction.CallbackContext context)
     {
         if (context.started && controlEnabled)
