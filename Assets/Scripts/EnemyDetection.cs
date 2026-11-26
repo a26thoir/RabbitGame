@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyDetection : MonoBehaviour
@@ -28,12 +29,17 @@ public class EnemyDetection : MonoBehaviour
     [Tooltip("Insert which way the sprite is facing at default (-1 = left, 1 = right) NEVER 0")] 
     [SerializeField] private int direction;
 
+    
+    [Tooltip("This is the object in which is the ¨vision¨ for the enemy(usually a cone or box)")]
+    [SerializeField] private GameObject detectionZone;
 
     private float idleTimer = 2.0f;
 
     private float detectionTime = 1.0f;
 
     private bool spotted;
+
+    private float idleToPatroltimer;
     
     
     private Vector2 BoundsLeft => new Vector2(BoundObject.min.x, BoundObject.min.y);
@@ -41,6 +47,11 @@ public class EnemyDetection : MonoBehaviour
     
 
     private EnemyStates currentstate = EnemyStates.Patrol;
+
+    void Start()
+    {
+        
+    }
     
     public enum EnemyStates
     {
@@ -71,6 +82,7 @@ public class EnemyDetection : MonoBehaviour
 
         if (idleTimer <= 0)
         {
+            if (raycastOffset < 0.1 && raycastOffset > 0) idleToPatroltimer = 1.0f;
             ChangeState(EnemyStates.Patrol);
         }
         
@@ -79,28 +91,54 @@ public class EnemyDetection : MonoBehaviour
 
     private void Patrol()
     {
+        if (raycastOffset < 0.1 && raycastOffset > 0) idleToPatroltimer -= Time.deltaTime;
+        
         Vector2 rayOrigin = (Vector2)transform.position + new Vector2(direction * raycastOffset, 0.3f);
 
         RaycastHit2D rayHit = Physics2D.Raycast(rayOrigin, Vector2.down, rayDistance, LayerMask.GetMask("Ground"));
-        
-        Debug.DrawRay(rayOrigin, Vector2.down * rayDistance, rayHit.collider != null? Color.green : Color.red);
 
-        if (rayHit.collider == null)
+        Debug.DrawRay(rayOrigin, Vector2.down * rayDistance, rayHit.collider ? Color.green : Color.red);
+
+        if (idleToPatroltimer <= 0 || (raycastOffset < 0.1 && raycastOffset > 0))
         {
-            direction *= -1;
-            ChangeState(EnemyStates.Idle);
+            if (!rayHit.collider)
+            {
+                direction *= -1;
+                ChangeState(EnemyStates.Idle);
+            }
         }
-        
+
         transform.Translate(Vector2.right * (direction * patrolSpeed * Time.deltaTime));
-        
+
         if (spotted) ChangeState(EnemyStates.Detect);
 
     }
 
-    /*void EnemySpot()
+
+    void OnTriggerEnter2D(Collider2D other)
     {
-        Vector2 rayOrigin = (Vector2)transform.position + new Vector2(direction * )
-    }*/
+        if (other.tag == "Player")
+        {
+            Vector2 rayOrigin = (Vector2)detectionZone.transform.position + new Vector2(detectionZone.transform.position.x/2 * direction,0);
+            
+            
+            
+            RaycastHit2D rayHit = Physics2D.Raycast(rayOrigin, (detectionZone.transform.position - other.transform.position).normalized, 
+                Vector2.Distance(rayOrigin, other.transform.position), LayerMask.GetMask("Player"));
+            
+            Debug.DrawRay(rayOrigin, );
+            if (rayHit.collider)
+            {
+                
+            }
+            
+        }
+    }
+    
+    void Hunt()
+    {
+    
+    }
     
 
     private void ChangeState(EnemyStates nextState)
