@@ -10,6 +10,9 @@ public class PlayerMovementScript : MonoBehaviour
     public bool canMove { get; set; } = true; // Can set movement controls on/ off Reference: Canvas Customizable Script 
     private bool grounded, wasGrounded = true;
     private Vector2 inputDirection = Vector2.zero;
+    private bool jumpInput = false;
+    
+    private bool jumping = false;
     private Vector2 horizontalVelocity = Vector2.zero;
     private Vector2 verticalVelocity = Vector2.zero;
 
@@ -24,6 +27,7 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] private float maxSpeed = 15f;
     [SerializeField] private float walkAcceleration = 15f;
     [SerializeField] private float initalSpeed = 5f;
+    [SerializeField] private float jumpForce = 30f;
     
     // Constructor
     
@@ -45,9 +49,15 @@ public class PlayerMovementScript : MonoBehaviour
 
     void Update()
     {
-        
-        
-        
+        //Animation
+        if (inputDirection.x > 0)
+        {
+            spriteRenderer.flipX = true;
+        }
+        else if (inputDirection.x < 0)
+        {
+            spriteRenderer.flipX = false;
+        }
     }
 
     private void FixedUpdate()
@@ -66,19 +76,18 @@ public class PlayerMovementScript : MonoBehaviour
         {
             horizontalVelocity = Vector2.zero;
         }
-
+        
+        //Where jumping actually happends
+        if (jumpInput && grounded)
+        {
+            verticalVelocity.y = jumpForce;
+            jumping = true;
+            grounded = false;
+        }
 
         rigidbody.linearVelocity = new Vector2(horizontalVelocity.x,verticalVelocity.y);
-        
-        //Animation
-        if (inputDirection.x > 0)
-        {
-            spriteRenderer.flipX = true;
-        }
-        else if (inputDirection.x < 0)
-        {
-            spriteRenderer.flipX = false;
-        }
+
+        wasGrounded = grounded;
     }
 
     private bool isGrounded()
@@ -88,7 +97,23 @@ public class PlayerMovementScript : MonoBehaviour
 
     private void ApplyGravity()
     {
-        
+        if (grounded && verticalVelocity.y < 0.0f)
+        {
+            verticalVelocity.y = -1.0f;
+        }
+        else
+        {
+            if (verticalVelocity.y > 0.0f)
+            {
+                float deceleration = 5;
+                if (jumping)
+                {
+                    deceleration = 1;
+                }
+                
+                
+            }
+        }
     }
 
     public void onMove(InputAction.CallbackContext context)
@@ -96,7 +121,19 @@ public class PlayerMovementScript : MonoBehaviour
         if (controlEnabled)
         {
             inputDirection = context.ReadValue<Vector2>().normalized;
-            Debug.Log("Bullishitti");
+            //Debug.Log("Bullishitti");
+        }
+    }
+
+    public void onJump(InputAction.CallbackContext context)
+    {
+        if (context.started && controlEnabled)
+        {
+            jumpInput = true;
+        }
+        else if (context.canceled && controlEnabled)
+        {
+            jumpInput = false;
         }
     }
 }
