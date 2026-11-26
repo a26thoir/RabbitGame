@@ -87,33 +87,35 @@ public class PlayerMovementScript : MonoBehaviour
         
         if (touchingWall)
         {
-            if (!hasBouncedOnWall && horizontalVelocity.magnitude > initalSpeed * 1.5)
+            if (horizontalVelocity.magnitude > initalSpeed * 1.5)
             {
                 hasBouncedOnWall = true;
                 horizontalVelocity.x *= -0.8f;
             }
-            else
+            else if (horizontalVelocity.magnitude < initalSpeed / 2.5)
             {
-                //horizontalVelocity.x *= 0;
+                horizontalVelocity.x = 0;
             }
             
         }
 
-        if (hasBouncedOnWall)
+        if (hasBouncedOnWall) // If wall collision has occurred, character is less responsive while airborne. 
         {
+            timeSinceMove = 0; 
             horizontalVelocity.x = math.lerp(horizontalVelocity.x, inputDirection.x * maxSpeed, Time.deltaTime);
+            lastInputX = horizontalVelocity.x;
         }
-        else if (inputDirection.x != 0)
+        else if (inputDirection.x != 0) // If player moves horizontally, calculates and applies speed
         {
             timeSinceMove = 0;
-            if (math.abs(horizontalVelocity.x) < initalSpeed)
+            if (math.abs(horizontalVelocity.x) < initalSpeed && grounded)
             {
                 horizontalVelocity.x = inputDirection.x * initalSpeed;
             }
             horizontalVelocity = Vector2.ClampMagnitude(horizontalVelocity + (walkAcceleration * Time.deltaTime * inputDirection), maxSpeed);
             lastInputX = horizontalVelocity.x;
         }
-        else
+        else // If no horizontal player input is detected, velocity/ movement is decelerated
         {
             timeSinceMove += Time.deltaTime;
             
@@ -130,9 +132,9 @@ public class PlayerMovementScript : MonoBehaviour
             
             horizontalVelocity.x = lastInputX * math.pow(decel,timeSinceMove);
 
-            if (grounded && horizontalVelocity.magnitude < initalSpeed / 1.5)
+            if (horizontalVelocity.magnitude < initalSpeed / 1.5)
             {
-                horizontalVelocity.x = 0;
+                horizontalVelocity = Vector2.zero;
             }
 
             
@@ -157,16 +159,22 @@ public class PlayerMovementScript : MonoBehaviour
         wasGrounded = grounded;
     }
 
+    // Checks collision with ground
+    
     private bool isGrounded()
     {
         return groundCollider.IsTouchingLayers(groundLayer);
     }
 
+    // Checks collision with wall
+    
     private bool isTouchingWall()
     {
         return wallCollider.IsTouchingLayers(groundLayer);
     }
 
+    // Calculates and applies gravity
+    
     private void ApplyGravity()
     {
         if (grounded && verticalVelocity.y < 0.0f)
@@ -193,6 +201,8 @@ public class PlayerMovementScript : MonoBehaviour
         }
     }
 
+    // Player moves with correct button inputs
+    
     public void onMove(InputAction.CallbackContext context)
     {
         if (controlEnabled)
@@ -202,7 +212,7 @@ public class PlayerMovementScript : MonoBehaviour
         }
     }
 
-    
+    // Registers when player is pressing jump button
     
     public void onJump(InputAction.CallbackContext context)
     {
