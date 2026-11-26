@@ -27,7 +27,7 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] private float maxSpeed = 15f;
     [SerializeField] private float walkAcceleration = 15f;
     [SerializeField] private float initalSpeed = 5f;
-    [SerializeField] private float jumpForce = 30f;
+    [SerializeField] private float jumpForce = 10f;
     
     // Constructor
     
@@ -63,6 +63,7 @@ public class PlayerMovementScript : MonoBehaviour
     private void FixedUpdate()
     {
         grounded = isGrounded();
+        ApplyGravity();
 
         if (inputDirection.x != 0)
         {
@@ -77,12 +78,17 @@ public class PlayerMovementScript : MonoBehaviour
             horizontalVelocity = Vector2.zero;
         }
         
-        //Where jumping actually happends
+        //Where jumping actually happens
         if (jumpInput && grounded)
         {
             verticalVelocity.y = jumpForce;
             jumping = true;
             grounded = false;
+        }
+        //Stops jumping if the key is not held.
+        else if (jumping && jumpInput == false)
+        {
+            jumping = false;
         }
 
         rigidbody.linearVelocity = new Vector2(horizontalVelocity.x,verticalVelocity.y);
@@ -110,8 +116,12 @@ public class PlayerMovementScript : MonoBehaviour
                 {
                     deceleration = 1;
                 }
-                
-                
+
+                verticalVelocity.y += Physics2D.gravity.y * deceleration * Time.deltaTime;
+            }
+            else
+            {
+                verticalVelocity.y += Physics2D.gravity.y * Time.deltaTime;
             }
         }
     }
