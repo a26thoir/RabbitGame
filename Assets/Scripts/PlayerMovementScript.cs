@@ -20,8 +20,10 @@ public class PlayerMovementScript : MonoBehaviour
 
     public bool controlEnabled { get; set; } = true;
     
+    [Header("Components")]
     [SerializeField] private Rigidbody2D rigidbody;
     [SerializeField] private CapsuleCollider2D groundCollider;
+    [SerializeField] private CapsuleCollider2D wallCollider;
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private LayerMask groundLayer = ~0;
     
@@ -69,6 +71,8 @@ public class PlayerMovementScript : MonoBehaviour
         grounded = isGrounded();
         ApplyGravity();
 
+        bool touchingWall = isTouchingWall();
+
         if (inputDirection.x != 0)
         {
             timeSinceMove = 0;
@@ -100,6 +104,11 @@ public class PlayerMovementScript : MonoBehaviour
             {
                 horizontalVelocity.x = 0;
             }
+
+            if (touchingWall)
+            {
+                //TODO Fortsätt här!!
+            }
         }
         
         //Where jumping actually happens
@@ -123,6 +132,11 @@ public class PlayerMovementScript : MonoBehaviour
     private bool isGrounded()
     {
         return groundCollider.IsTouchingLayers(groundLayer);
+    }
+
+    private bool isTouchingWall()
+    {
+        return wallCollider.IsTouchingLayers(groundLayer);
     }
 
     private void ApplyGravity()
