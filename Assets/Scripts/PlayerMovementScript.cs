@@ -18,6 +18,7 @@ public class PlayerMovementScript : MonoBehaviour
     private Vector2 verticalVelocity = Vector2.zero;
     private float timeSinceMove = 1.0f;
     private float lastInputX = 0.0f;
+    private float timeSinceFalling = 0.0f;
 
     public bool controlEnabled { get; set; } = true;
     
@@ -180,24 +181,27 @@ public class PlayerMovementScript : MonoBehaviour
         if (grounded && verticalVelocity.y < 0.0f)
         {
             verticalVelocity.y = -1.0f;
+            timeSinceFalling = 0;
         }
         else
         {
+            timeSinceFalling += Time.deltaTime;
+            float deceleration = 5f;
             if (verticalVelocity.y > 0.0f)
             {
-                float deceleration = 10;
                 if (jumping)
                 {
-                    deceleration = 2;
+                    deceleration = 2f;
                 }
+                else
+                {
+                    deceleration = 10f;
+                }
+                
+            }
 
-                verticalVelocity.y += Physics2D.gravity.y * deceleration * Time.deltaTime;
-            }
-            else
-            {
-                jumping = false;
-                verticalVelocity.y += Physics2D.gravity.y * Time.deltaTime;
-            }
+            verticalVelocity.y = math.clamp(verticalVelocity.y + (Physics2D.gravity.y * deceleration * Time.deltaTime),-25f,50);
+            
         }
     }
 

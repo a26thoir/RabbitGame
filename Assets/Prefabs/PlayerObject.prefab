@@ -551,7 +551,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   maxSpeed: 15
   walkAcceleration: 15
-  initalSpeed: 5
+  initalSpeed: 6.5
   jumpForce: 15
   groundedDeceleration: 0.05
   aerialDeceleration: 0.3
