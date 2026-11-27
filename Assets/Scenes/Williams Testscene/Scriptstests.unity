@@ -793,13 +793,17 @@ PrefabInstance:
       propertyPath: playerhitbox
       value: 
       objectReference: {fileID: 1111291498}
+    - target: {fileID: 4560485367016944299, guid: 3b6beadcbafcb4b4283a43a8dfa83cd6, type: 3}
+      propertyPath: outerDetectionRadius
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 5719764865800643147, guid: 3b6beadcbafcb4b4283a43a8dfa83cd6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.32
+      value: 7.508
       objectReference: {fileID: 0}
     - target: {fileID: 5719764865800643147, guid: 3b6beadcbafcb4b4283a43a8dfa83cd6, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.35
+      value: -3.361
       objectReference: {fileID: 0}
     - target: {fileID: 5719764865800643147, guid: 3b6beadcbafcb4b4283a43a8dfa83cd6, type: 3}
       propertyPath: m_LocalPosition.z
@@ -838,7 +842,8 @@ PrefabInstance:
       value: Square (1)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 5714420735245714892, guid: 3b6beadcbafcb4b4283a43a8dfa83cd6, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3b6beadcbafcb4b4283a43a8dfa83cd6, type: 3}

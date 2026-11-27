@@ -41,9 +41,11 @@ public class EnemyDetection : MonoBehaviour
 
     [SerializeField] private Collider2D playerhitbox;
 
-    [SerializeField] private float jumpForce = 2.0f;
+    [SerializeField] private float jumpForce = 1f;
     
     private Vector3 lastKnownPosition = Vector3.zero;
+
+    private Rigidbody2D enemyBody;
     
     
     
@@ -52,7 +54,7 @@ public class EnemyDetection : MonoBehaviour
 
     private float detectionholdupTime = 1.0f;
 
-    private float detectionHuntTime = 5.0f;
+    private float huntTime = 5.0f;
 
     private bool spotted;
 
@@ -67,6 +69,7 @@ public class EnemyDetection : MonoBehaviour
 
     void Start()
     {
+        enemyBody = GetComponent<Rigidbody2D>();
         
     }
     
@@ -97,7 +100,16 @@ public class EnemyDetection : MonoBehaviour
             
             transform.position = new Vector3(xpos, transform.position.y, transform.position.z);
             
-            RaycastHit2D wall = new RaycastHit2D()
+            Vector2 rayOrigin = (Vector2)transform.position + new Vector2(direction * raycastOffset, 0.3f);
+            
+            RaycastHit2D wallCheck = Physics2D.Raycast(rayOrigin, Vector3.right * direction, 2f, LayerMask.GetMask("Ground"));
+            
+            Debug.DrawRay(rayOrigin, (Vector3.right * direction) * 2f, wallCheck.collider ? Color.green : Color.red);
+
+            if (!wallCheck.collider)
+            {
+                enemyBody.AddForce(Vector2.up * jumpForce);
+            }
             
         }
 
@@ -105,22 +117,19 @@ public class EnemyDetection : MonoBehaviour
             && detectionholdupTime <= 0) return;
 
         if (Vector3.Distance(player.transform.position, this.transform.position) >= outerDetectionRadius &&
-            detectionholdupTime >= 0)
+            huntTime >= 0)
         {
-            detectionholdupTime -= Time.deltaTime;
-            
-
-
-
+            huntTime -= Time.deltaTime;
         }
+        if (Vector3.Distance(player.transform.position, this.transform.position) >= outerDetectionRadius &&
+            huntTime <= 0)
         {
-            
-            
             
             Debug.Log("not detected");
             ChangeState(EnemyStates.Idle);
             spotted = false;
             detectionholdupTime = 1.0f;
+            huntTime = 5.0f;
         }
     }
 
