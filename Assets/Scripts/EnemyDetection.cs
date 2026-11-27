@@ -1,6 +1,7 @@
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class EnemyDetection : MonoBehaviour
 {
@@ -25,7 +26,7 @@ public class EnemyDetection : MonoBehaviour
     [SerializeField] public float patrolSpeed = 2.0f;
 
     [Tooltip("This is the HuntSpeed of the enemy")] 
-    [SerializeField] private float huntSpeed = 6.0f;
+    [SerializeField] private float huntSpeed = 8.0f;
 
     [Tooltip("Insert which way the sprite is facing at default (-1 = left, 1 = right) NEVER 0")] 
     [SerializeField] private int direction;
@@ -34,21 +35,26 @@ public class EnemyDetection : MonoBehaviour
     [Tooltip("This is the object in which is the ¨vision¨ for the enemy(usually a cone or box)")]
     [SerializeField] private GameObject detectionZone;
 
-    [Tooltip("This is the object which is the outer bounds for the enemy(outer detection)")] 
-    [SerializeField] private GameObject OuterDetectionZone;
+    [SerializeField] private float outerDetectionRadius;
 
     [SerializeField] private Transform test;
 
     [SerializeField] private Collider2D playerhitbox;
+
+    [SerializeField] private float jumpForce = 1f;
     
-    private CircleCollider2D OuterDetectCircle => OuterDetectionZone.GetComponent<CircleCollider2D>();
+    private Vector3 lastKnownPosition = Vector3.zero;
+
+    private Rigidbody2D enemyBody;
+    
+    
     
 
     private float idleTimer = 2.0f;
 
     private float detectionholdupTime = 1.0f;
 
-    private float detectionHuntTime = 5.0f;
+    private float huntTime = 5.0f;
 
     private bool spotted;
 
@@ -63,6 +69,7 @@ public class EnemyDetection : MonoBehaviour
 
     void Start()
     {
+        enemyBody = GetComponent<Rigidbody2D>();
         
     }
     
@@ -72,26 +79,58 @@ public class EnemyDetection : MonoBehaviour
         Patrol,
         Detect
     }
+    
+    
+    
 
     private void Detect()
     {
         detectionholdupTime -= Time.deltaTime;
-        //if (detectionholdupTime <= 0 && Physics2D.OverlapCircle(OuterDetectCircle.transform.position, OuterDetectCircle.radius, 7 ) )
-        if (OuterDetectCircle.IsTouching(playerhitbox))
+        
+        if (Vector3.Distance(player.transform.position, this.transform.position) <= outerDetectionRadius 
+            && detectionholdupTime <= 0)
         {
             Debug.Log("detected");
-            Vector2 tryToMove = Vector2.MoveTowards(
-                    transform.position, 
-                    player.transform.position, 
+            float xpos =  Mathf.MoveTowards(
+                    transform.position.x, 
+                    player.transform.position.x, 
                     huntSpeed * Time.deltaTime);
             
+            lastKnownPosition = player.transform.position;
+            
+            transform.position = new Vector3(xpos, transform.position.y, transform.position.z);
+            
+            Vector2 rayOrigin = (Vector2)transform.position + new Vector2(direction * raycastOffset, 0.3f);
+            
+            RaycastHit2D wallCheck = Physics2D.Raycast(rayOrigin, Vector3.right * direction, 2f, LayerMask.GetMask("Ground"));
+            
+            Debug.DrawRay(rayOrigin, (Vector3.right * direction) * 2f, wallCheck.collider ? Color.green : Color.red);
+
+            if (!wallCheck.collider)
+            {
+                enemyBody.AddForce(Vector2.up * jumpForce);
+            }
+            
         }
-        /*else
+
+        if (Vector3.Distance(player.transform.position, this.transform.position) <= outerDetectionRadius
+            && detectionholdupTime <= 0) return;
+
+        if (Vector3.Distance(player.transform.position, this.transform.position) >= outerDetectionRadius &&
+            huntTime >= 0)
         {
-            Debug.Log(" not detected");
+            huntTime -= Time.deltaTime;
+        }
+        if (Vector3.Distance(player.transform.position, this.transform.position) >= outerDetectionRadius &&
+            huntTime <= 0)
+        {
+            
+            Debug.Log("not detected");
             ChangeState(EnemyStates.Idle);
             spotted = false;
-        }*/
+            detectionholdupTime = 1.0f;
+            huntTime = 5.0f;
+        }
     }
 
     private void Idle()
