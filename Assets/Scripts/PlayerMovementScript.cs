@@ -8,15 +8,15 @@ public class PlayerMovementScript : MonoBehaviour
     // Fields
 
     public bool canMove { get; set; } = true; // Can set movement controls on/ off Reference: Canvas Customizable Script 
-    private bool grounded, wasGrounded = true;
+    private bool grounded;
     private bool hasBouncedOnWall = false;
     private Vector2 inputDirection = Vector2.zero;
     private bool jumpInput = false;
     
     private bool jumping = false;
-    private Vector2 horizontalVelocity = Vector2.zero;
-    private Vector2 verticalVelocity = Vector2.zero;
-    private float timeSinceMove = 1.0f;
+    private Vector2 horizontalVelocity = Vector2.zero; 
+    private Vector2 verticalVelocity = Vector2.zero; 
+    private float timeSinceMoveInput = 1.0f; 
     private float lastInputX = 0.0f;
     private float timeSinceFalling = 0.0f;
 
@@ -34,18 +34,13 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] private float walkAcceleration = 15f;
     [SerializeField] private float initalSpeed = 5f;
     [SerializeField] private float jumpForce = 10f;
-    [SerializeField] private float groundedDeceleration = 0.5f;
+    [SerializeField] private float groundedDeceleration = 0.05f;
     [SerializeField] private float aerialDeceleration = 0.5f;
     
     // Constructor
     
     // Methods
     
-    void Start()
-    {
-        
-    }
-
     private void Awake()
     {
         rigidbody = GetComponent<Rigidbody2D>();
@@ -54,21 +49,27 @@ public class PlayerMovementScript : MonoBehaviour
         rigidbody.gravityScale = 0f;
         controlEnabled = true;
     }
+    
+    void Start()
+    {
+        
+    }
+
 
     void Update()
     {
         //Animation
-        Vector2 horzAnimationVelocity = inputDirection;
+        Vector2 horizAnimationVelocity = inputDirection;
         if (hasBouncedOnWall)
         {
-            horzAnimationVelocity = horizontalVelocity;
+            horizAnimationVelocity = horizontalVelocity;
         }
         
-        if (horzAnimationVelocity.x > 0)
+        if (horizAnimationVelocity.x > 0)
         {
             spriteRenderer.flipX = true;
         }
-        else if (horzAnimationVelocity.x < 0)
+        else if (horizAnimationVelocity.x < 0)
         {
             spriteRenderer.flipX = false;
         }
@@ -88,12 +89,12 @@ public class PlayerMovementScript : MonoBehaviour
         
         if (touchingWall)
         {
-            if (horizontalVelocity.magnitude > initalSpeed * 1.5)
+            if (horizontalVelocity.magnitude > initalSpeed * 1.5) 
             {
                 hasBouncedOnWall = true;
                 horizontalVelocity.x *= -0.8f;
             }
-            else if (horizontalVelocity.magnitude < initalSpeed / 2.5)
+            else if (horizontalVelocity.magnitude < initalSpeed / 2.5) 
             {
                 horizontalVelocity.x = 0;
             }
@@ -102,13 +103,13 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (hasBouncedOnWall) // If wall collision has occurred, character is less responsive while airborne. 
         {
-            timeSinceMove = 0; 
+            timeSinceMoveInput = 0; 
             horizontalVelocity.x = math.lerp(horizontalVelocity.x, inputDirection.x * maxSpeed, Time.deltaTime);
             lastInputX = horizontalVelocity.x;
         }
         else if (inputDirection.x != 0) // If player moves horizontally, calculates and applies speed
         {
-            timeSinceMove = 0;
+            timeSinceMoveInput = 0;
             if (math.abs(horizontalVelocity.x) < initalSpeed && grounded)
             {
                 horizontalVelocity.x = inputDirection.x * initalSpeed;
@@ -118,7 +119,7 @@ public class PlayerMovementScript : MonoBehaviour
         }
         else // If no horizontal player input is detected, velocity/ movement is decelerated
         {
-            timeSinceMove += Time.deltaTime;
+            timeSinceMoveInput += Time.deltaTime;
             
             float decel = aerialDeceleration;
             if (grounded)
@@ -126,14 +127,14 @@ public class PlayerMovementScript : MonoBehaviour
                 decel = groundedDeceleration;
             }
 
-            if (grounded && horizontalVelocity.magnitude < initalSpeed)
+            if (grounded && horizontalVelocity.x < initalSpeed)
             {
                 decel *= decel;
             }
             
-            horizontalVelocity.x = lastInputX * math.pow(decel,timeSinceMove);
+            horizontalVelocity.x = lastInputX * math.pow(decel,timeSinceMoveInput * 2);
 
-            if (horizontalVelocity.magnitude < initalSpeed / 1.5)
+            if (horizontalVelocity.magnitude < initalSpeed / 1.5) 
             {
                 horizontalVelocity = Vector2.zero;
             }
@@ -156,8 +157,6 @@ public class PlayerMovementScript : MonoBehaviour
         }
 
         rigidbody.linearVelocity = new Vector2(horizontalVelocity.x,verticalVelocity.y);
-
-        wasGrounded = grounded;
     }
 
     // Checks collision with ground
@@ -187,7 +186,7 @@ public class PlayerMovementScript : MonoBehaviour
         {
             timeSinceFalling += Time.deltaTime;
             float deceleration = 5f;
-            if (verticalVelocity.y > 0.0f)
+            if (verticalVelocity.y > 0.0f) // If traveling upward
             {
                 if (jumping)
                 {
@@ -195,7 +194,7 @@ public class PlayerMovementScript : MonoBehaviour
                 }
                 else
                 {
-                    deceleration = 10f;
+                    deceleration = 40f;
                 }
                 
             }
@@ -212,7 +211,6 @@ public class PlayerMovementScript : MonoBehaviour
         if (controlEnabled)
         {
             inputDirection = context.ReadValue<Vector2>().normalized;
-            //Debug.Log("Bullishitti");
         }
     }
 
